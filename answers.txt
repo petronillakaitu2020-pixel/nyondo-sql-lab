@@ -4,3 +4,100 @@ KAITU PETRONILLA JOAN 22nd April 2026
 (3, 'Paint 5L', 'Exterior wall paint white 5L', 60000.0)
 (4, 'Nails 1kg', 'Common wire nails 1kg pack', 12000.0)
 (5, 'Timber 2x4', 'Pine timber plank 2x4 per metre', 25000.0)
+
+
+TASK TWO
+import sqlite3
+
+# Connect to the database created in Task 1
+conn = sqlite3.connect('nyondo_stock.db')
+cursor = conn.cursor()
+
+def run_query(label, description, sql):
+    print(f"\n--- Query {label}: {description} ---")
+    print(f"Executing: {sql}")
+    cursor.execute(sql)
+    
+    # For UPDATE statements (Query G), we need to commit and then verify
+    if "UPDATE" in sql.upper():
+        conn.commit()
+        print("Update successful.")
+    else:
+        results = cursor.fetchall()
+        for row in results:
+            print(row)
+
+# [span_1](start_span)TASK 2 QUERIES[span_1](end_span)
+
+# Query A: Get every column of every product
+run_query('A', 'All columns', 'SELECT * FROM products')
+
+# Query B: Get only the name and price of all products
+run_query('B', 'Name and Price only', 'SELECT name, price FROM products')
+
+# Query C: Get full details of the product with id = 3
+run_query('C', 'ID equals 3', 'SELECT * FROM products WHERE id = 3')
+
+# Query D: Find all products whose name contains 'sheet' (partial match)
+run_query('D', 'Name contains "sheet"', "SELECT * FROM products WHERE name LIKE '%sheet%'")
+
+# Query E: Get all products sorted by price, highest first
+run_query('E', 'Sorted by price (High to Low)', 'SELECT * FROM products ORDER BY price DESC')
+
+# Query F: Get only the 2 most expensive products
+run_query('F', 'Top 2 most expensive', 'SELECT * FROM products ORDER BY price DESC LIMIT 2')
+
+# Query G: Update the price of Cement (id=1) to 38,000 then confirm
+run_query('G', 'Update Cement price', 'UPDATE products SET price = 38000 WHERE id = 1')
+
+# Final Verification for Query G
+print("\n--- Verification for Query G ---")
+cursor.execute('SELECT * FROM products WHERE id = 1')
+print(cursor.fetchone())
+
+conn.close()
+
+OUTPUT
+--- Query A: All columns ---
+Executing: SELECT * FROM products
+(1, 'Cement (bag)', 'Portland cement 50kg bag', 38000.0)
+(2, 'Iron Sheet 3m', 'Gauge 30 roofing sheet 3m long', 110000.0)
+(3, 'Paint 5L', 'Exterior wall paint white 5L', 60000.0)
+(4, 'Nails 1kg', 'Common wire nails 1kg pack', 12000.0)
+(5, 'Timber 2x4', 'Pine timber plank 2x4 per metre', 25000.0)
+
+--- Query B: Name and Price only ---
+Executing: SELECT name, price FROM products
+('Cement (bag)', 38000.0)
+('Iron Sheet 3m', 110000.0)
+('Paint 5L', 60000.0)
+('Nails 1kg', 12000.0)
+('Timber 2x4', 25000.0)
+
+--- Query C: ID equals 3 ---
+Executing: SELECT * FROM products WHERE id = 3
+(3, 'Paint 5L', 'Exterior wall paint white 5L', 60000.0)
+
+--- Query D: Name contains "sheet" ---
+Executing: SELECT * FROM products WHERE name LIKE '%sheet%'
+(2, 'Iron Sheet 3m', 'Gauge 30 roofing sheet 3m long', 110000.0)
+
+--- Query E: Sorted by price (High to Low) ---
+Executing: SELECT * FROM products ORDER BY price DESC
+(2, 'Iron Sheet 3m', 'Gauge 30 roofing sheet 3m long', 110000.0)
+(3, 'Paint 5L', 'Exterior wall paint white 5L', 60000.0)
+(1, 'Cement (bag)', 'Portland cement 50kg bag', 38000.0)
+(5, 'Timber 2x4', 'Pine timber plank 2x4 per metre', 25000.0)
+(4, 'Nails 1kg', 'Common wire nails 1kg pack', 12000.0)
+
+--- Query F: Top 2 most expensive ---
+Executing: SELECT * FROM products ORDER BY price DESC LIMIT 2
+(2, 'Iron Sheet 3m', 'Gauge 30 roofing sheet 3m long', 110000.0)
+(3, 'Paint 5L', 'Exterior wall paint white 5L', 60000.0)
+
+--- Query G: Update Cement price ---
+Executing: UPDATE products SET price = 38000 WHERE id = 1
+Update successful.
+
+--- Verification for Query G ---
+(1, 'Cement (bag)', 'Portland cement 50kg bag', 38000.0)
