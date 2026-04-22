@@ -153,3 +153,45 @@ Result: (1, 'admin', 'admin123', 'admin')
 --- ATTACK 4: UNION attack ---
 Query: SELECT * FROM products WHERE name LIKE '%' UNION SELECT id, username, password, role FROM users--%'
 Result: [(1, 'Cement (bag)', 'Portland cement 50kg bag', 35000.0), (1, 'admin', 'admin123', 'admin'), (2, 'Iron Sheet 3m', 'Gauge 30 roofing sheet 3m long', 110000.0), (2, 'fatuma', 'pass456', 'attendant'), (3, 'Paint 5L', 'Exterior wall paint white 5L', 60000.0), (3, 'wasswa', 'pass789', 'manager'), (4, 'Nails 1kg', 'Common wire nails 1kg pack', 12000.0), (4, 'admin', 'admin123', 'admin'), (5, 'Timber 2x4', 'Pine timber plank 2x4 per metre', 25000.0), (5, 'fatuma', 'pass456', 'attendant'), (6, 'Cement (bag)', 'Portland cement 50kg bag', 35000.0), (6, 'wasswa', 'pass789', 'manager'), (7, 'Iron Sheet 3m', 'Gauge 30 roofing sheet 3m long', 110000.0), (8, 'Paint 5L', 'Exterior wall paint white 5L', 60000.0), (9, 'Nails 1kg', 'Common wire nails 1kg pack', 12000.0), (10, 'Timber 2x4', 'Pine timber plank 2x4 per metre', 25000.0)]
+
+task 4
+Query: SELECT * FROM products WHERE name LIKE ?
+Result: []
+
+Test 1: None
+Query: SELECT * FROM products WHERE name LIKE ?
+Result: []
+
+Test 2: None
+Query: SELECT * FROM users WHERE username=? AND password=?
+Result: None
+
+Test 3: None
+Query: SELECT * FROM users WHERE username=? AND password=?
+Result: None
+
+Test 4: None, 
+
+Using parameterized queries the ?placeholder, the database now treats the injection payloads as literal
+strings rather than executable SQL commands. This effectively neutralizes the attack, as seen by the empty
+resultsin the terminal.
+in the string, python sends data as one giant string whereas parametrised queries, python sends comman and data separately
+import sqlite3
+conn = sqlite3.connect('nyondo_stock.db')
+
+def search_product_safe(name):
+    # SECURE: The '?' placeholder treats input as plain text
+    query = "SELECT * FROM products WHERE name LIKE ?"
+    # Wrap the search term in % for the LIKE operator
+    results = conn.execute(query, (f"%{name}%",)).fetchall()
+    print(f"Query: {query}")
+    print(f"Result: {results}\n")
+
+def login_safe(username, password):
+    # SECURE: Parameterized inputs prevent bypasses
+    query = "SELECT * FROM users WHERE username=? AND password=?"
+    result = conn.execute(query, (username, password)).fetchone()
+    print(f"Query: {query}")
+    print(f"Result: {result}\n")
+
+    
